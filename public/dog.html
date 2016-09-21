@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+    <title>Simple Canvas</title>
+    <script src="javascripts/RequestAnimationFrame.js"></script>
+    <script type="text/javascript" src="javascripts/jquery-1.7.1.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style tyte='text/css'>
+        @font-face {
+            font-family: 'MatrixCode';
+            /*src: url('http://www.miketaylr.com/f/kulminoituva.ttf');*/
+            /*src: url('MatrixCodeNFI.ttf') format('truetype');*/
+            src: url('ennobled.ttf') format('truetype');
+        }
+    </style>
+    <style type='text/css'>
+        input {
+            border-color: yellow;
+            padding: 6px;
+            color: black;
+            text-align: center;
+            background-image: -webkit-radial-gradient(circle, #AEF1B4, black);
+        }
+
+        #canvas-wrap { position:relative; width:800px; height:600px; }
+        #canvas-wrap canvas {
+            background-color: black;
+            position:absolute;
+            top:0;
+            left:0;
+            z-index:-1
+        }
+
+        #overlay {
+            position: absolute;
+            margin-top: 550px;
+            /*margin-left: 25%;*/
+            margin-left: 20%;
+            width : 70%
+        }
+    </style>
+    <script type="text/javascript">
+        /** global variables for debug purpose **/
+        var canvas;
+        var ctx;
+        var mcodes = [];
+        var codesize = {x:48, y:60};
+
+        var socket = io.connect('http://localhost:3000');
+
+        function get_random_color() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.round(Math.random() * 15)];
+            }
+            return color;
+        }
+
+        socket.on('resetmatrixcanvas', function(){
+            setTimeout(function(){
+                ctx.clearRect(0,0,800,600);
+            }, 10);
+        });
+
+        socket.on('thematrixdecoded', function(){
+            socket.emit('thematrixdecoded');
+        });
+
+        var MCode = function(name, color){
+
+            var length = parseInt((Math.random() * 9) + 1);
+            var start_pos = {x: this.pos.x, y:0};
+            var head_pos = {x:start_pos.x, y:0};
+            var tail_pos = {x:head_pos.x, y: (head_pos.y - (length * codesize.y))};
+
+            socket.on(name, function(matrix){
+                ctx.font      = '60px MatrixCode';
+                ctx.fillStyle = color;
+                ctx.fillText(matrix.code, head_pos.x, head_pos.y);
+                tail_pos = {x:head_pos.x, y: (head_pos.y - (length * codesize.y))};
+                if (matrix.reveal == false) {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(tail_pos.x, tail_pos.y, codesize.x, codesize.y);
+                    if (tail_pos.y >= 600) {
+                        head_pos.y = (-codesize.y);
+                        tail_pos.y = 0;
+                        length = parseInt((Math.random() * 9) + 1);
+                    }
+                }
+                else {
+                    //ctx.clearRect(0, 0, 800, 600);
+                    if (length != 20) {
+                        head_pos.y = (-codesize.y);
+                        tail_pos.y = 0;
+                        length = 20;
+                    }
+                }
+                head_pos.y += codesize.y;
+            });
+
+            this.pos.x += codesize.x;
+
+            return { name : name};
+        };
+
+        MCode.prototype.pos = {x:0, y:0};
+
+        $(document).ready(function(){
+
+            /** force font to load before writing to canvas **/
+            $('body').append("<div id='loadfont' style='font-family: MatrixCode;'>.</div>");
+
+            canvas = $("canvas")[0];
+            ctx = canvas.getContext("2d");
+            ctx.font         = '120px MatrixCode';
+            //ctx.fillStyle    = 'orangered';
+            ctx.fillStyle    = 'green';
+            ctx.textBaseline = 'top';
+
+            for ( var i=0; i < (parseInt(canvas.width /codesize.x) + 1); i++) {
+                var name = 'm' + i;
+                mcodes.push(new MCode(name, get_random_color()));
+            }
+            socket.emit('mcodes', { slots: mcodes });
+
+            $('input').click(function() {
+                this.value = '';
+            });
+
+            $('input').keyup(function(e) {
+                if (e.keyCode == 13) {
+                    socket.emit('thematrix', { codes: this.value});
+                }
+            });
+
+            // remove it after custom font is loaded
+            //$('#loadfont').remove();
+            //requestAnimationFrame(redraw);
+            //setTimeout( function() {
+            //    requestAnimationFrame(redraw);
+            //}, 1000 / 1 );
+        });
+    </script>
+</head>
+<body style='background-color: black'>
+<div id="canvas-wrap" style='float:left;margin-left: 20%'>
+    <canvas id="canvas" width="800" height="600">
+        please use a modern browser that support HTML5
+    </canvas>
+    <div id="overlay">
+        <input type='text' size='80' value='do you understand the matrix?'>
+    </div>
+</div>
+</body>
+</html>
+

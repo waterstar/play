@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+    <title>Simple Canvas</title>
+    <script src="javascripts/RequestAnimationFrame.js"></script>
+    <script type="text/javascript" src="javascripts/jquery-1.7.1.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="javascripts/thematrix.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Ruslan+Display' rel='stylesheet' type='text/css'>-->
+    <style tyte='text/css'>
+        /*@import url(http://fonts.googleapis.com/css?family=Gloria+Hallelujah);*/
+        @import url(http://fonts.googleapis.com/css?family=Ruslan+Display);
+        @font-face {
+            font-family: 'MatrixCode';
+            /*src: url('http://www.miketaylr.com/f/kulminoituva.ttf');*/
+            src: url('MatrixCodeNFI.ttf') format('truetype');
+            /*src: url('ennobled.ttf') format('truetype');*/
+        }
+    </style>
+    <style type='text/css'>
+        h1 {
+            font-size: 60px;
+            color: #ffd700;
+            -webkit-transform: rotate(-10deg);
+            margin-top: 30px;
+        }
+
+        input {
+            border-color: yellow;
+            padding: 6px;
+            color: black;
+            text-align: center;
+            background-image: -webkit-radial-gradient(circle, #AEF1B4, black);
+        }
+
+        #canvas-wrap { position:relative; width:800px; height:600px; }
+
+        canvas {
+            background-color : black;
+            position : absolute;
+            top : 0;
+            left : 0;
+            z-index : 0
+        }
+
+        #mainMenu {
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            color:brown;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            background-color: #006400;
+        }
+
+        #overlay {
+            position: absolute;
+            margin-top: 550px;
+            /*margin-left: 25%;*/
+            margin-left: 25%;
+            width : 70%;
+            z-index : 1
+        }
+    </style>
+</head>
+<!--<body style='background-color: black'>-->
+<body>
+<div id="canvas-wrap" style='float:left;margin-left: 20%'>
+    <canvas id="canvas" width="800" height="600">
+        please use a modern browser that support HTML5
+    </canvas>
+    <canvas id="canvas1" width="800" height="600" style='z-index:-100; background-color: #183118;'>
+        please use a modern browser that support HTML5
+    </canvas>
+    <div id="mainMenu">
+        <h1>Welcome !</h1>
+        <div style='margin-left:40%; position:absolute; top:100px;'>the matrix puzzle</div>
+    </div>
+    <div id="overlay">
+        <input type='text' size='80' value='do you understand the matrix?'>
+    </div>
+</div>
+</body>
+</html>
+

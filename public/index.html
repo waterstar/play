@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript" src="javascripts/jquery-1.7.1.js"></script>
+<script src="javascripts/jquery.ui.widget.js"></script>
+<script src="javascripts/jquery.iframe-transport.js"></script>
+<script src="javascripts/jquery.fileupload.js"></script>
+<script type="text/javascript" src="javascripts/turn.js"></script>
+<script type="text/javascript" src="javascripts/fabric.js"></script>
+
+<style type="text/css">
+body{
+	background:#ccc;
+}
+#magazine{
+	width:1152px;
+	height:752px;
+}
+#magazine .turn-page{
+	background-color:#ccc;
+	background-size:100% 100%;
+}
+</style>
+</head>
+<body>
+<div id="magazine">
+	<div style="background-image:url(pages/01.jpg);"></div>
+	<div style="background-image:url(pages/02.jpg);"></div>
+    <!--
+	<div style="background-image:url(pages/03.jpg);"></div>
+	<div style="background-image:url(pages/04.jpg);"></div>
+	<div style="background-image:url(pages/05.jpg);"></div>
+	<div style="background-image:url(pages/06.jpg);"></div>
+	-->
+    <div><canvas id="page3" style='background-color: #add8e6' width="1152px" height="752px">
+        <!--<input id="fileupload" type="file" name="files[]" data-url="localhost:3000" multiple>-->
+        <input id="fileupload" type="file" name="files[]" multiple>
+    </canvas></div>
+</div>
+
+
+<script type="text/javascript">
+
+	$(window).ready(function() {
+		$('#magazine').turn({
+            display: 'double',
+            acceleration: true,
+            gradients: !$.isTouch,
+            elevation:50,
+            when: {
+                turned: function(e, page) {
+                    /*console.log('Current view: ', $(this).turn('view'));*/
+                }
+            }
+		});
+	});
+	
+	
+	$(window).bind('keydown', function(e){
+		
+		if (e.keyCode==37)
+		    $('#magazine').turn('previous');
+		else if (e.keyCode==39)
+			$('#magazine').turn('next');
+        else if (e.keyCode==8){
+            e.preventDefault();
+            page3.remove(page3.getActiveObject());
+        }
+	});
+
+    var page3;
+
+    $(document).ready(function(){
+        page3 = new fabric.Canvas('page3',{});
+        fabric.Image.fromURL('pages/03.jpg', function(img) {
+            var oImg = img.set({ left: 250, top: 350, angle: -10 }).scale(0.7);
+            page3.add(oImg).renderAll();
+        });
+        fabric.Image.fromURL('pages/04.jpg', function(img) {
+            var oImg = img.set({ left: 250, top: 350, angle: -20 }).scale(0.7);
+            page3.add(oImg).renderAll();
+        });
+
+//        $('#page3').bind('DOMSubtreeModified',function(){
+//            //console.log("now there are " + $('a').length + " links on this page.");
+//            var imgArray = $('#page3 img');
+//            console.log('added photo to page3 ! total number of images : ' + imgArray.length);
+//
+//            fabric.Image.fromObject(imgArray[imgArray.length - 1], function(img) {
+//                var oImg = img.set({ left: 250, top: 350, angle: -30 }).scale(0.3);
+//                page3.add(oImg).renderAll();
+//            });
+//        })
+
+        $('#fileupload').fileupload({
+            drop: function (e, data) {
+                console.log('Dropped files !!');
+                $.each(data.files, function (index, file) {
+                    // Only process image files.
+                    if (!file.type.match('image.*')) {
+                        return true;
+                    }
+
+                    var reader = new FileReader();
+
+                    // Closure to capture the file information.
+                    reader.onload = (function(theFile) {
+                        return function(e) {
+                            // Render thumbnail.
+                            var theimg = {name: theFile.name, src : e.target.result };
+                            fabric.Image.fromObject(theimg, function(img) {
+                                var oImg = img.set({ left: 250, top: 350, angle: -30 }).scale(0.3);
+                                page3.add(oImg).renderAll();
+                            });
+                        };
+                    })(file);
+
+                    // Read in the image file as a data URL.
+                    reader.readAsDataURL(file);
+                });
+
+            },
+
+            add: function (e, data) {
+                console.log('add event !');
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>
